@@ -12,6 +12,8 @@ class SpeedCam :
         print("Done Loading! Now Fusing Model...")
         self.model.fuse()
         print("Done with the fuse!")
+        
+        self.object_classes = self.model.model.names
     
 
     def resize_n_write_video(self, out_vid, in_vid=VIDEO_FILE) :
@@ -60,7 +62,11 @@ class SpeedCam :
                 break
             
             if speed_engine :
+                # Use yolov8 to perform vehicle detection
                 detections = self.object_detection_on_vid(frame)
+                # Annotate and draw boxes around vehicles in the frame
+                frame = self.annotate_vehicles(frame, detections.boxes)
+                
             
             cv2.imshow("Frame", frame)
             if cv2.waitKey(25) & 0xFF==ord("q") :
@@ -72,14 +78,49 @@ class SpeedCam :
         
     def object_detection_on_vid(self, frame) :
             detections = self.model(frame)[0]
-            print(f"detections.boxes: {detections.boxes}")
             return detections
         
     
-    def annotate_vehicles(self, boxes) :
-        pass
+    def bounding_box_color(self, label) :
+        if label == 0 : # Person
+            color = (255, 85, 45) # purple
+        elif label == 1 : # Bicycle
+            color = (51, 34, 164) # forrest green
+        elif label == 2 : # Car
+            color = (175, 222, 82) # pink
+        elif label == 3 :  # Motobike
+            color = (255, 0, 204) # teal
+        elif label == 5 :  # Bus
+            color = (255, 0, 149) # darker teal
+        elif label == 7 : # Truck
+            color = (71, 246, 227) # gold
+        else:
+            color = (255, 0, 0)
+        return color
+    
+    
+    def annotate_vehicles(self, frame, boxes) :
+        # Initializing the font configurations
+        FONT = cv2.FONT_HERSHEY_COMPLEX_SMALL
+        FONTSCALE = 1
+        THICKNESS = 2
+        
+        # xy locations and classes of all vehicles
+        xyxy = boxes.xyxy.tolist()
+        classes = boxes.cls.tolist()
+        for vehicle, vehicle_class in zip(xyxy, classes) :
+            vehicle = [int(i) for i in vehicle]
+            # color correspondign to the vehicle
+            color = self.bounding_box_color(vehicle_class)
+            print(f"vehicle[:2]: {vehicle[:2]}")
+            print(f"vehicle[2:]: {vehicle[2:]}")
+            frame = cv2.rectangle(frame, vehicle[:2], vehicle[2:], color, 2)
+            frame = cv2.putText(frame, f'{self.object_classes[vehicle_class]}', (vehicle[0], vehicle[1]-5), FONT,  
+                   FONTSCALE, color, THICKNESS, cv2.LINE_AA)
+        
+        return frame
 
 
 if __name__ == "__main__" :
     system = SpeedCam()
-    system.display_vid_n_predict()
+    system.display_vid_n_predict(speed_engine=True)
