@@ -4,7 +4,7 @@ from ultralytics import YOLO
 
 class SpeedCam :
     MODEL = "yolov8l.pt"
-    VIDEO_FILE = "vehicle-counting1.mp4"
+    VIDEO_FILE = "vid_files/vehicle-counting1.mp4"
 
     def __init__(self) :
         print("Loading model...")
@@ -81,5 +81,5 @@ class SpeedCam :
 
 
 if __name__ == "__main__" :
-
-    object_detection_on_vid()
+    system = SpeedCam()
+    system.display_vid_n_predict()
