@@ -3,7 +3,7 @@ from ultralytics import YOLO
 
 
 class Detection :
-    MODEL = "yolov8l.pt"
+    MODEL = "models/yolov8l.pt"
     VIDEO_FILE = "vid_files/vehicle-counting1.mp4"
 
     def __init__(self) :
