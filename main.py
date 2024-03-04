@@ -1,5 +1,6 @@
 import cv2
 from scripts.yolo_detection import Detection
+from scripts.tracker import Tracker
 
 
 class SpeedCam :
@@ -28,8 +29,17 @@ class SpeedCam :
             if speed_engine :
                 # Use yolov8 to perform vehicle detection
                 detections = detector.object_detection_on_vid(frame)
+                
+                # Apply the vehicle tracker to the frame to id and track the vehicles
+                detected_data = detections.boxes.data.tolist()
+                tracker.update(frame, detected_data)
+                tracked_ids = list()
+                for track in tracker.tracks :
+                    track_id = track.track_id
+                    tracked_ids.append(track_id)
+                
                 # Annotate and draw boxes around vehicles in the frame
-                frame = detector.annotate_vehicles(frame, detections.boxes)
+                frame = detector.annotate_vehicles(frame, detected_data, tracked_ids)
                 
             
             cv2.imshow("Frame", frame)
@@ -41,4 +51,8 @@ class SpeedCam :
         
 
 detector = Detection()
-    
+tracker = Tracker()
+
+if __name__ == "__main__" :
+    ai_cam = SpeedCam()
+    ai_cam.display_vid_n_predict(speed_engine=True)

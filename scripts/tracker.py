@@ -21,12 +21,14 @@ class Tracker :
         self.encoder = generate_detections.create_box_encoder(encoder_model_file, batch_size=1)
         
     def update(self, frame, detections) :
+        print("$"*50)
+        print("In tracker func!!!")
         if len(detections) == 0 :
             self.tracker.predict()
             self.tracker.update([])
             self.update_tracks()
             return
-        
+        detections = [[int(i[0]), int(i[1]), int(i[2]), int(i[3]), i[4]] for i in detections]
         bboxes = np.asarray([d[:-1] for d in detections])
         bboxes[:, 2:] = bboxes[:, 2:] - bboxes[:, 0:2]
         print(f"bboxes: {bboxes}   len(bboxes): {bboxes}")

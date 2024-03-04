@@ -59,7 +59,8 @@ class Detection :
                 # Use yolov8 to perform vehicle detection
                 detections = self.object_detection_on_vid(frame)
                 # Annotate and draw boxes around vehicles in the frame
-                frame = self.annotate_vehicles(frame, detections.boxes)
+                detected_data = detections.boxes.data.tolist()
+                frame = self.annotate_vehicles(frame, detected_data)
                 
             
             cv2.imshow("Frame", frame)
@@ -70,22 +71,28 @@ class Detection :
         cv2.destroyAllWindows()
     
     
-    def annotate_vehicles(self, frame, boxes) :
+    def annotate_vehicles(self, frame, detections, tracked_ids=None) :
         # Initializing the font configurations
         FONT = cv2.FONT_HERSHEY_COMPLEX_SMALL
         FONTSCALE = 1
         THICKNESS = 2
         
-        # xy locations and classes of all vehicles
-        xyxy = boxes.xyxy.tolist()
-        classes = boxes.cls.tolist()
-        for vehicle, vehicle_class in zip(xyxy, classes) :
-            vehicle = [int(i) for i in vehicle]
-            # color correspondign to the vehicle
-            color = self.bounding_box_color(vehicle_class)
-            frame = cv2.rectangle(frame, vehicle[:2], vehicle[2:], color, 2)
-            frame = cv2.putText(frame, f'{self.object_classes[vehicle_class]}', (vehicle[0], vehicle[1]-5), FONT,  
-                   FONTSCALE, color, THICKNESS, cv2.LINE_AA)
+        if tracked_ids :
+            for vehicle, id in zip(detections, tracked_ids) :
+                bbox = [int(i) for i in vehicle[:4]]
+                # color correspondign to the vehicle
+                color = self.bounding_box_color(vehicle[5])
+                frame = cv2.rectangle(frame, bbox[:2], bbox[2:], color, 2)
+                frame = cv2.putText(frame, f'#{id}. {self.object_classes[vehicle[5]]}', (bbox[0], bbox[1]-5), FONT,  
+                    FONTSCALE, color, THICKNESS, cv2.LINE_AA)
+        else :
+            for vehicle in detections :
+                bbox = [int(i) for i in vehicle[:4]]
+                # color correspondign to the vehicle
+                color = self.bounding_box_color(vehicle[5])
+                frame = cv2.rectangle(frame, bbox[:2], bbox[2:], color, 2)
+                frame = cv2.putText(frame, f'{self.object_classes[vehicle[5]]}', (bbox[0], bbox[1]-5), FONT,  
+                    FONTSCALE, color, THICKNESS, cv2.LINE_AA)
         
         return frame
 
@@ -93,3 +100,4 @@ class Detection :
 if __name__ == "__main__" :
     system = Detection()
     system.display_vid_n_predict(detection_engine=True)
+    # system.display_vid_n_predict()
