@@ -2,4 +2,3 @@ __pycache__/
 yolov8l.pt
 rough.py
 .gitignore
-deep_sort/
