@@ -1,6 +1,6 @@
 import cv2
 from scripts.yolo_detection import Detection
-from scripts.tracker import Tracker
+from scripts.deepsort_tracker import Tracker
 
 
 class SpeedCam :
