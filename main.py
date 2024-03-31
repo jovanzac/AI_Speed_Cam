@@ -1,6 +1,6 @@
 import cv2
 from scripts.yolo_detection import Detection
-from scripts.deepsort_tracker import Tracker
+from scripts.bytetrack_tracker import Tracker
 
 
 class SpeedCam :
@@ -33,13 +33,9 @@ class SpeedCam :
                 # Apply the vehicle tracker to the frame to id and track the vehicles
                 detected_data = detections.boxes.data.tolist()
                 tracker.update(frame, detected_data)
-                tracked_ids = list()
-                for track in tracker.tracks :
-                    track_id = track.track_id
-                    tracked_ids.append(track_id)
                 
                 # Annotate and draw boxes around vehicles in the frame
-                frame = detector.annotate_vehicles(frame, detected_data, tracked_ids)
+                frame = detector.annotate_vehicles(frame, tracker.tracks)
                 
             
             cv2.imshow("Frame", frame)

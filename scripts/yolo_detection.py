@@ -1,7 +1,8 @@
 import cv2
 from ultralytics import YOLO
+from scripts.helpers import DetectionObj
 
-
+ 
 class Detection :
     MODEL = "models/yolov8l.pt"
     VIDEO_FILE = "vid_files/vehicle-counting1.mp4"
@@ -17,7 +18,7 @@ class Detection :
         
         
     def object_detection_on_vid(self, frame) :
-            detections = self.model(frame)[0]
+            detections = self.model.predict(frame, conf=0.3)[0]
             return detections
         
     
@@ -60,7 +61,8 @@ class Detection :
                 detections = self.object_detection_on_vid(frame)
                 # Annotate and draw boxes around vehicles in the frame
                 detected_data = detections.boxes.data.tolist()
-                frame = self.annotate_vehicles(frame, detected_data)
+                tracks = [DetectionObj(pred=detection) for detection in detected_data]
+                frame = self.annotate_vehicles(frame, tracks, tracking=False)
                 
             
             cv2.imshow("Frame", frame)
@@ -71,33 +73,36 @@ class Detection :
         cv2.destroyAllWindows()
     
     
-    def annotate_vehicles(self, frame, detections, tracked_ids=None) :
+    def annotate_vehicles(self, frame, tracks, tracking=True) :
         # Initializing the font configurations
         FONT = cv2.FONT_HERSHEY_COMPLEX_SMALL
         FONTSCALE = 1
         THICKNESS = 2
         
-        if tracked_ids :
-            for vehicle, id in zip(detections, tracked_ids) :
-                bbox = [int(i) for i in vehicle[:4]]
-                # color correspondign to the vehicle
-                color = self.bounding_box_color(vehicle[5])
+        if tracking :
+            for detection in tracks :
+                if detection.tracker_id == None :
+                    print(f"detection.class_attributes: {detection.class_attributes}")
+                bbox = detection.rect
+                # color corresponding to the vehicle
+                color = self.bounding_box_color(detection.class_id)
                 frame = cv2.rectangle(frame, bbox[:2], bbox[2:], color, 2)
-                frame = cv2.putText(frame, f'#{id}. {self.object_classes[vehicle[5]]}', (bbox[0], bbox[1]-5), FONT,  
+                frame = cv2.putText(frame, f'#{detection.tracker_id}. {self.object_classes[detection.class_id]}', (bbox[0], bbox[1]-5), FONT,  
                     FONTSCALE, color, THICKNESS, cv2.LINE_AA)
         else :
-            for vehicle in detections :
-                bbox = [int(i) for i in vehicle[:4]]
-                # color correspondign to the vehicle
-                color = self.bounding_box_color(vehicle[5])
+            for detection in tracks :
+                # bbox = [int(i) for i in track.bbox[:4]]
+                bbox = detection.rect
+                # color corresponding to the vehicle
+                color = self.bounding_box_color(detection.class_id)
                 frame = cv2.rectangle(frame, bbox[:2], bbox[2:], color, 2)
-                frame = cv2.putText(frame, f'{self.object_classes[vehicle[5]]}', (bbox[0], bbox[1]-5), FONT,  
+                frame = cv2.putText(frame, f'{self.object_classes[detection.class_id]}', (bbox[0], bbox[1]-5), FONT,  
                     FONTSCALE, color, THICKNESS, cv2.LINE_AA)
         
         return frame
 
 
 if __name__ == "__main__" :
-    system = Detection()
-    system.display_vid_n_predict(detection_engine=True)
-    # system.display_vid_n_predict()
+    # system = Detection()
+    # system.display_vid_n_predict(detection_engine=True)
+    print("Code cannot be executed from this scope. Go to root directory of the project and write a script to execute it there")
