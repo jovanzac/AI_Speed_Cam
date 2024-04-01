@@ -16,15 +16,15 @@ class BYTETrackerArgs:
     aspect_ratio_thresh: float = 3.0
     min_box_area: float = 1.0
     mot20: bool = False
-    
-    
+
+
 class Tracker :
     def __init__(self) :
         # initiate tracker
         self.byte_tracker = BYTETracker(BYTETrackerArgs())
-        self.tracks = None 
+        self.tracks = None
 
-    
+
     # matches our bounding boxes with predictions
     def match_detections_with_tracks(self, detections, tracks) :
         detection_boxes = detections2boxes(detections=detections, with_confidence=False)
@@ -37,7 +37,7 @@ class Tracker :
                 detections[detection_index].tracker_id = tracks[tracker_index].track_id
         return detections
 
-    
+
     def update(self, frame, detections) :
         # Convert the detections to <class> Detection type
         detections = DetectionObj.from_results(pred=detections)
@@ -47,6 +47,6 @@ class Tracker :
             img_info = frame.shape,
             img_size = frame.shape
         )
-        
+
         tracked_detections = self.match_detections_with_tracks(detections=detections, tracks=tracks)
         self.tracks = tracked_detections

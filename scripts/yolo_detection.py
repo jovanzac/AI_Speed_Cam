@@ -18,7 +18,7 @@ class Detection :
         
         
     def object_detection_on_vid(self, frame) :
-            detections = self.model.predict(frame, conf=0.3)[0]
+            detections = self.model.predict(frame, conf=0.3, classes=[1, 2, 3, 5, 7])[0]
             return detections
         
     
