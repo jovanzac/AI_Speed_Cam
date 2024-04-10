@@ -2,6 +2,15 @@ from dataclasses import dataclass
 import numpy as np
 
 
+LINE1_LEFT = (335, 408)
+LINE1_RIGHT = (1087, 408)
+LINE2_LEFT = (212, 498)
+LINE2_RIGHT = (1275, 498)
+
+PHYSICAL_DIST = 12 #meters
+FPS = 25.0
+
+
 @dataclass
 class DetectionObj :
     rect: list
@@ -12,13 +21,13 @@ class DetectionObj :
     @classmethod
     def from_results(cls, pred) :
         result = []
-        for x_min, y_min, x_max, y_max, confidence, class_id in pred:
+        for top_l_x, top_l_y, btm_r_x, btm_r_y, confidence, class_id in pred:
             class_id = int(class_id)
             result.append(DetectionObj(
-                rect = [int(x_min),
-                      int(y_min),
-                      int(x_max),
-                      int(y_max)],
+                rect = [int(top_l_x),
+                      int(top_l_y),
+                      int(btm_r_x),
+                      int(btm_r_y)],
                 class_id = class_id,
                 confidence = float(confidence)
             ))
@@ -41,6 +50,13 @@ class Track :
     def __init__(self, t_id, detection) :
         self.track_id = t_id
         self.detection = detection
+        
+
+# Not in use
+@dataclass
+class SpeedObj :
+    vehicle_centre: tuple
+    vehicle_id: int
 
 
 def detections2boxes(detections, with_confidence = True) :

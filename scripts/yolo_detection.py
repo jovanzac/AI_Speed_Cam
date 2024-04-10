@@ -1,6 +1,7 @@
 import cv2
 from ultralytics import YOLO
 from scripts.helpers import DetectionObj
+from scripts.helpers import LINE1_LEFT, LINE1_RIGHT, LINE2_LEFT, LINE2_RIGHT
 
  
 class Detection :
@@ -73,31 +74,35 @@ class Detection :
         cv2.destroyAllWindows()
     
     
-    def annotate_vehicles(self, frame, tracks, tracking=True) :
+    def annotate_vehicles(self, frame, tracks, vehicle_speeds=None, tracking=True) :
         # Initializing the font configurations
         FONT = cv2.FONT_HERSHEY_COMPLEX_SMALL
         FONTSCALE = 1
         THICKNESS = 2
         
-        if tracking :
+        if tracking and vehicle_speeds != None :
             for detection in tracks :
-                if detection.tracker_id == None :
-                    print(f"detection.class_attributes: {detection.class_attributes}")
+                det_id = detection.tracker_id
                 bbox = detection.rect
                 # color corresponding to the vehicle
                 color = self.bounding_box_color(detection.class_id)
                 frame = cv2.rectangle(frame, bbox[:2], bbox[2:], color, 2)
-                frame = cv2.putText(frame, f'#{detection.tracker_id}. {self.object_classes[detection.class_id]}', (bbox[0], bbox[1]-5), FONT,  
-                    FONTSCALE, color, THICKNESS, cv2.LINE_AA)
+                # frame = cv2.putText(frame, f'#{detection.tracker_id}. {self.object_classes[detection.class_id]}', (bbox[0], bbox[1]-5), FONT,  
+                #     FONTSCALE, color, THICKNESS, cv2.LINE_AA)
+                speed = f"{round(vehicle_speeds[det_id])} km/h" if vehicle_speeds[det_id] != None else None
+                frame = cv2.putText(frame, f'#{det_id}. speed:{speed}', (bbox[0], bbox[1]-5), FONT,
+                    FONTSCALE, color, 1, cv2.LINE_AA)
         else :
             for detection in tracks :
-                # bbox = [int(i) for i in track.bbox[:4]]
                 bbox = detection.rect
                 # color corresponding to the vehicle
                 color = self.bounding_box_color(detection.class_id)
                 frame = cv2.rectangle(frame, bbox[:2], bbox[2:], color, 2)
                 frame = cv2.putText(frame, f'{self.object_classes[detection.class_id]}', (bbox[0], bbox[1]-5), FONT,  
                     FONTSCALE, color, THICKNESS, cv2.LINE_AA)
+        
+        frame = cv2.line(frame, LINE1_LEFT, LINE1_RIGHT, (51, 34, 164), THICKNESS)
+        frame = cv2.line(frame, LINE2_LEFT, LINE2_RIGHT, (51, 34, 164), THICKNESS)
         
         return frame
 

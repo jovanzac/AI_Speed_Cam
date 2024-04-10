@@ -35,6 +35,10 @@ class Tracker :
         for tracker_index, detection_index in enumerate(track2detection):
             if iou[tracker_index, detection_index] != 0:
                 detections[detection_index].tracker_id = tracks[tracker_index].track_id
+        for detection in detections :
+            if detection.tracker_id == None :
+                detections.remove(detection)
+            
         return detections
 
 

@@ -22,7 +22,8 @@ class Tracker :
         metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_dist, nn_budget)
         self.tracker = DeepSortTracker(metric)
         self.encoder = generate_detections.create_box_encoder(encoder_model_file, batch_size=1)
-        
+
+
     def update(self, frame, detections) :
         # print("$"*50)
         print("In tracker func!!!")
@@ -45,8 +46,8 @@ class Tracker :
         self.tracker.predict()
         self.tracker.update(dets)
         self.update_tracks(detections)
-        
-    
+
+
     def update_tracks(self, detections) :
         tracks = []
         detections  = DetectionObj.from_results(pred=detections)
