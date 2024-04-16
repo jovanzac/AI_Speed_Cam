@@ -3,3 +3,5 @@ yolov8l.pt
 rough.py
 .gitignore
 License Plate Recognition.v4-resized640_aug3x-accurate.yolov8.zip
+license_plate_detector.pt
+mars-small128.pb
