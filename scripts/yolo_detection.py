@@ -1,26 +1,65 @@
 import cv2
 from ultralytics import YOLO
+from onemetric.cv.utils.iou import box_iou_batch
+from collections import defaultdict
+
 from scripts.helpers import DetectionObj
 from scripts.helpers import LINE1_LEFT, LINE1_RIGHT, LINE2_LEFT, LINE2_RIGHT
 
- 
+
 class Detection :
     MODEL = "models/yolov8l.pt"
+    PLATE_MODEL = "models/license_plate_detector.pt"
     VIDEO_FILE = "vid_files/vehicle-counting1.mp4"
 
     def __init__(self) :
-        print("Loading model...")
+        print("Loading vehicle detection YOLO model...")
         self.model = YOLO(self.MODEL)
         print("Done Loading! Now Fusing Model...")
-        self.model.fuse()
+        print("Loading plate detection YOLO model...")
+        self.plate_model = YOLO(self.PLATE_MODEL)
+        print("Done Loading! Now Fusing Model...")
+        self.plate_model.fuse()
         print("Done with the fuse!")
         
         self.object_classes = self.model.model.names
+        self.plate_counter = defaultdict(lambda: 0)
         
         
     def object_detection_on_vid(self, frame) :
             detections = self.model.predict(frame, conf=0.3, classes=[1, 2, 3, 5, 7])[0]
             return detections
+        
+        
+    def plate_detection_on_vid(self, frame) :
+        detections = self.plate_model.predict(frame, conf=0.3)[0]
+        return detections
+    
+    def plate_detection_for_vehicle(self, frame, vehicles, violators) :
+        """Finds the correct bounding boxes of number plates corresponding to cars
+        that have violated the speed limit.
+
+        Args:
+            frame (np.array): A numpy array representing the video frame
+            vehicles (<class> DetectionObj): An object representing and holding all the attibutes of vehicles. 
+            violators (dict): A dict of all the vehicles violating the speed limit
+        """
+        violating_plates = dict()
+        all_plates = self.plate_detection_on_vid(frame).boxes.data.tolist()
+        for vehicle in vehicles :
+            if vehicle.tracker_id in violators :
+                cx1, cy1, cx2, cy2 = vehicle.vehicle_rect
+                print((cx1, cy1), (cx2, cy2))
+                for px1, py1, px2, py2, _, _ in all_plates :
+                    print((px1, py1), (px2, py2))
+                    if (cx1<px1 and cy1<py1) and (cx2>px2 and cy2>py2) :
+                        print("in if")
+                        vehicle.plate_rect = [
+                            int(px1), int(py1), int(px2), int(py2)
+                        ]
+                        violating_plates[vehicle.tracker_id] = vehicle.plate_rect
+
+        return violating_plates
         
     
     def bounding_box_color(self, label) :
@@ -39,6 +78,27 @@ class Detection :
         else:
             color = (255, 0, 0)
         return color
+    
+    
+    def extract_plate_from_img(self, frame, plate, vehicle_id) :
+        """Create a new image of the plate alone
+
+        Args:
+            frame : the complete image frame
+            plate (list): the bounding box of the number plate
+            vehicle_id (int): the id of the vehicle the plate belongs to
+        """
+        if vehicle_id in self.plate_counter :
+            self.plate_counter[vehicle_id] += 1
+        else :
+            self.plate_counter[vehicle_id] = 1
+        IMG_NAME = f"plate{vehicle_id}-{self.plate_counter[vehicle_id]}"
+        PLATES_DIR = "./plates/"
+        plate_img = frame[plate[1]:plate[3], plate[0]:plate[2]]
+        plate_loc = f"{PLATES_DIR}{IMG_NAME}.png"
+        cv2.imwrite(plate_loc, plate_img)
+        
+        return plate_loc
     
     
     def display_vid_n_predict(self, invid=VIDEO_FILE, detection_engine=False) :
@@ -74,7 +134,7 @@ class Detection :
         cv2.destroyAllWindows()
     
     
-    def annotate_vehicles(self, frame, tracks, vehicle_speeds=None, tracking=True) :
+    def annotate_vehicles(self, frame, tracks, vehicle_speeds=None, tracking=True, violators=[]) :
         # Initializing the font configurations
         FONT = cv2.FONT_HERSHEY_COMPLEX_SMALL
         FONTSCALE = 1
@@ -83,9 +143,9 @@ class Detection :
         if tracking and vehicle_speeds != None :
             for detection in tracks :
                 det_id = detection.tracker_id
-                bbox = detection.rect
+                bbox = detection.vehicle_rect
                 # color corresponding to the vehicle
-                color = self.bounding_box_color(detection.class_id)
+                color = self.bounding_box_color(detection.class_id) if det_id not in violators else (0, 0, 255)
                 frame = cv2.rectangle(frame, bbox[:2], bbox[2:], color, 2)
                 # frame = cv2.putText(frame, f'#{detection.tracker_id}. {self.object_classes[detection.class_id]}', (bbox[0], bbox[1]-5), FONT,  
                 #     FONTSCALE, color, THICKNESS, cv2.LINE_AA)
@@ -94,7 +154,7 @@ class Detection :
                     FONTSCALE, color, 1, cv2.LINE_AA)
         else :
             for detection in tracks :
-                bbox = detection.rect
+                bbox = detection.vehicle_rect
                 # color corresponding to the vehicle
                 color = self.bounding_box_color(detection.class_id)
                 frame = cv2.rectangle(frame, bbox[:2], bbox[2:], color, 2)
@@ -105,6 +165,9 @@ class Detection :
         frame = cv2.line(frame, LINE2_LEFT, LINE2_RIGHT, (51, 34, 164), THICKNESS)
         
         return frame
+
+
+detector = Detection()
 
 
 if __name__ == "__main__" :

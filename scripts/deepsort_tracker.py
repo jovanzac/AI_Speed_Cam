@@ -25,8 +25,6 @@ class Tracker :
 
 
     def update(self, frame, detections) :
-        # print("$"*50)
-        print("In tracker func!!!")
         if len(detections) == 0 :
             self.tracker.predict()
             self.tracker.update([])

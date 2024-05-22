@@ -1,7 +1,13 @@
 __pycache__/
 yolov8l.pt
 rough.py
-.gitignore
 License Plate Recognition.v4-resized640_aug3x-accurate.yolov8.zip
 license_plate_detector.pt
 mars-small128.pb
+firebase_rough.py
+service_account.json
+.env
+flask_streaming_rough.py
+vid_files/*
+plates/
+# index.html

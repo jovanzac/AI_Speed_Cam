@@ -2,7 +2,7 @@ import cv2
 
 
 class SupportTools :
-    VIDEO_FILE = "vid_files/vehicle-counting1.mp4"
+    VIDEO_FILE = "vid_files/test2.mp4"
     
     def resize_n_write_video(self, out_vid, in_vid=VIDEO_FILE) :
         """Can be used to resize the frames of a specified video and
@@ -34,3 +34,8 @@ class SupportTools :
 
         cap.release()
         cv2.destroyAllWindows()
+        
+        
+if __name__ == "__main__" :
+    tools = SupportTools()
+    tools.resize_n_write_video("test2_resized.mp4")

@@ -54,3 +54,6 @@ class Tracker :
 
         tracked_detections = self.match_detections_with_tracks(detections=detections, tracks=tracks)
         self.tracks = tracked_detections
+        
+
+tracker = Tracker()
