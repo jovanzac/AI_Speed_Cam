@@ -12,4 +12,5 @@ vid_files/*
 plates/
 models/*
 templates/
+dist/
 # index.html

@@ -3,13 +3,24 @@ from flask_cors import CORS
 from scripts import db_manager, ai_cam
 
 
-app = Flask(__name__)
+# app = Flask(__name__)
+app = Flask(__name__, static_url_path='',
+                  static_folder='dist',
+                  template_folder='dist')
 CORS(app)
 
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+# @app.route('/')
+# def index():
+#     return render_template('index.html')
+@app.route("/")
+def hello():
+    return render_template("index.html")
+
+
+@app.errorhandler(404)   
+def not_found(e):   
+  return app.send_static_file('index.html')
 
 
 @app.route("/login", methods=["POST"])
