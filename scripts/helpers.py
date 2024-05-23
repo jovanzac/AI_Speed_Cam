@@ -100,6 +100,15 @@ def tracks2boxes(tracks) :
         in tracks
     ], dtype=float) 
     
+    
+
+def remove_files_from_local(paths=["./plates/"]) :
+    for path in paths :
+        files = os.listdir(path)
+        for file in files :
+            file_path = path + file
+            if os.path.exists(file_path) :
+                os.remove(file_path)
 
     
     

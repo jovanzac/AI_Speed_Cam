@@ -1,5 +1,5 @@
 import cv2
-# from scripts.video_streaming import streamer
+from scripts.helpers import remove_files_from_local
 
 
 class SpeedCam :
@@ -44,6 +44,9 @@ class SpeedCam :
                 file_loc = self.detector.extract_plate_from_img(frame, plates[v_id], v_id)
                 # Put the image of the plate into firebase storage.
                 self.db_manager.plates_to_storage(file_loc=file_loc)
+
+        # Remove all the files from ./plates/ directory
+        remove_files_from_local(paths=["./plates/"])
 
         # Annotate and draw boxes around vehicles in the frame
         frame = self.detector.annotate_vehicles(frame, self.tracker.tracks, self.speed_estimator.vehicle_speeds, True, self.speed_estimator.violators)
