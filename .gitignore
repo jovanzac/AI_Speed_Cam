@@ -11,6 +11,5 @@ flask_streaming_rough.py
 vid_files/*
 plates/
 models/*
-templates/
 dist/
 # index.html
