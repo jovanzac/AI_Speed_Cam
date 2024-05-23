@@ -49,11 +49,8 @@ class Detection :
         for vehicle in vehicles :
             if vehicle.tracker_id in violators :
                 cx1, cy1, cx2, cy2 = vehicle.vehicle_rect
-                print((cx1, cy1), (cx2, cy2))
                 for px1, py1, px2, py2, _, _ in all_plates :
-                    print((px1, py1), (px2, py2))
                     if (cx1<px1 and cy1<py1) and (cx2>px2 and cy2>py2) :
-                        print("in if")
                         vehicle.plate_rect = [
                             int(px1), int(py1), int(px2), int(py2)
                         ]
@@ -167,7 +164,7 @@ class Detection :
         return frame
 
 
-detector = Detection()
+# detector = Detection()
 
 
 if __name__ == "__main__" :

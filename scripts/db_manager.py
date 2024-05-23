@@ -54,4 +54,4 @@ class DbManager :
             return False
         
         
-db_manager = DbManager()
+# db_manager = DbManager()

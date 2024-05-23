@@ -2,7 +2,7 @@ import numpy as np
 
 from dataclasses import dataclass
 
-from ByteTrack.yolox.tracker.byte_tracker import BYTETracker, STrack
+from ByteTrack.yolox.tracker.byte_tracker import BYTETracker
 from onemetric.cv.utils.iou import box_iou_batch
 
 from scripts.helpers import DetectionObj, detections2boxes, tracks2boxes
@@ -56,4 +56,4 @@ class Tracker :
         self.tracks = tracked_detections
         
 
-tracker = Tracker()
+# tracker = Tracker()

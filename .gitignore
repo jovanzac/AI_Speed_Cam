@@ -10,4 +10,6 @@ service_account.json
 flask_streaming_rough.py
 vid_files/*
 plates/
+models/*
+templates/
 # index.html

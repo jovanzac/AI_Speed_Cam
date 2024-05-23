@@ -56,4 +56,4 @@ class SpeedDetection :
         return m, c
             
             
-speed_estimator = SpeedDetection()
+# speed_estimator = SpeedDetection()

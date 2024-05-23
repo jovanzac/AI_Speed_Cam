@@ -1,10 +1,15 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response, render_template
 from flask_cors import CORS
-from db_manager import db_manager
+from scripts import db_manager, ai_cam
 
 
 app = Flask(__name__)
 CORS(app)
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 @app.route("/login", methods=["POST"])
@@ -27,6 +32,13 @@ def login_route() :
             }), 401
             
             
-@app.route("/stream")
-def stream_route() :
-    pass
+@app.route('/raw-video', methods=["GET"])
+def raw_video_stream():
+    if request.method == "GET" :
+        return Response(ai_cam.yeild_processed_frames(speed_engine=False),mimetype='multipart/x-mixed-replace; boundary=frame')
+    
+
+@app.route("/processed-video", methods=["GET"])
+def processed_video_stream() :
+    if request.method == "GET" :
+        return Response(ai_cam.yeild_processed_frames(),mimetype='multipart/x-mixed-replace; boundary=frame')
