@@ -107,3 +107,9 @@ def decode_psswd(encrypted_psswd) :
     decrypted_psswd = crypter.decrypt(encrypted_psswd)
     
     return str(decrypted_psswd, 'utf8')
+
+
+def encode_psswd(raw_psswd) :
+    encrypted_psswd = crypter.encrypt(raw_psswd.encode())
+    
+    return encrypted_psswd

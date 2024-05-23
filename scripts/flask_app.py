@@ -32,6 +32,34 @@ def login_route() :
             }), 401
             
             
+@app.route("/signup", methods=["POST"])
+def signup_user() :
+    if request.method == "POST" :
+        response = request.json
+        uid = response["uid"]
+        name = response["name"]
+        username = response["username"]
+        psswd = response["password"]
+        email = response["email"]
+        phone_no = response["phone_no"]
+        
+        if db_manager.signup_user(uid, name, username, psswd, email, phone_no) :
+            return jsonify(
+                {
+                    "Status": "Success",
+                    "Response": "User created"
+                }
+            ), 200
+            
+        else :
+            return jsonify(
+                {
+                    "Status": "Failure",
+                    "Response": "User already exists"
+                }
+            ), 409
+            
+            
 @app.route('/raw-video', methods=["GET"])
 def raw_video_stream():
     if request.method == "GET" :

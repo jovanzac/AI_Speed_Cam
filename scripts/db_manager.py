@@ -2,7 +2,7 @@ import os
 import pyrebase
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-from scripts.helpers import decode_psswd
+from scripts.helpers import decode_psswd, encode_psswd
 
 
 class DbManager :
@@ -44,14 +44,37 @@ class DbManager :
             
         
     def authenticate_user(self, username, psswd) :
-        user_psswd = decode_psswd(psswd)
-        user = self.speed_db["Users"].find_one({"username": username, "password": user_psswd})
+        user = self.speed_db["Users"].find_one({"Username": username})
+
         if user:
-            # Document with the same username and password exists
-            return True
+            stored_password = user['Password']
+            decoded_password = decode_psswd(stored_password)
+            if decoded_password == psswd:
+                # Passwords match
+                return True
+
+        return False
+        
+    
+    def signup_user(self, uid, name, username, psswd, email, phone_no) :
+        user_exists = self.speed_db["Users"].find_one({"Username": username})
+        if user_exists:
+            # Document with the same username exists
+            return False
         else:
             # Document does not exist
-            return False
-        
-        
-# db_manager = DbManager()
+            # Encrypt the password
+            psswd = encode_psswd(psswd)
+            # Put the user in the database
+            self.speed_db["Users"].insert_one(
+                {
+                    "UID": uid,
+                    "Name": name,
+                    "Username": username,
+                    "Email": email,
+                    "Phone_no": phone_no,
+                    "Password": psswd
+                }
+            )
+                
+            return True
