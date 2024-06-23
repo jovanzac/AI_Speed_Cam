@@ -16,7 +16,7 @@ LINE2_RIGHT = (1275, 498)
 
 PHYSICAL_DIST = 12 #meters
 FPS = 25.0
-SPEED_LIMIT = 20 #km/hr
+SPEED_LIMIT = 30 #km/hr
 
 
 KEY = os.environ.get("PASSWORD_KEY")

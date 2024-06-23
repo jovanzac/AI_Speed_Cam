@@ -3,10 +3,10 @@ from flask_cors import CORS
 from scripts import db_manager, ai_cam
 
 
-app = Flask(__name__)
-# app = Flask(__name__, static_url_path='',
-#                   static_folder='dist',
-#                   template_folder='dist')
+# app = Flask(__name__)
+app = Flask(__name__, static_url_path='',
+                  static_folder='dist',
+                  template_folder='dist')
 CORS(app)
 
 
@@ -78,3 +78,15 @@ def raw_video_stream():
 def processed_video_stream() :
     if request.method == "GET" :
         return Response(ai_cam.yeild_processed_frames(),mimetype='multipart/x-mixed-replace; boundary=frame')
+    
+    
+@app.route("/plate-info", methods=["GET"])
+def get_plate_info() :
+    if request.method == "GET" :
+        all_plates = db_manager.get_plates_from_mongo()
+        plates = list(filter(lambda plate: plate["valid"], all_plates))
+        
+        return jsonify({
+            "Status": "Success",
+            "Response": plates
+        }, 200)

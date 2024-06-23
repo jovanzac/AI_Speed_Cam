@@ -78,3 +78,8 @@ class DbManager :
             )
                 
             return True
+        
+    
+    def get_plates_from_mongo(self) :
+        all_plates = list(self.speed_db["Traffic_violation"].find({}, {"_id": 0}))
+        return all_plates
